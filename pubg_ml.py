@@ -5,6 +5,9 @@ from imblearn.over_sampling import SMOTE
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
+from sklearn.linear_model import LogisticRegressionCV
+import matplotlib as mpl
+import  matplotlib.pyplot as plt
 
 # 是否获得胜利
 def is_win(rank):
@@ -86,14 +89,35 @@ if __name__=='__main__':
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1/3, random_state=42)
 
     # 生成逻辑回归模型
-    lr_model = LogisticRegression(C=1.0)
-    lr_model.fit(X_train, y_train)
-    y_pred = lr_model.predict(X_test)
-
-    # 查看得分
+    # 交叉验证
+    LR_model = LogisticRegressionCV(Cs=np.logspace(-3, 4, 8), cv=5)
+    LR_model.fit(X_train, y_train)
+    print('超参数：\n', LR_model.C_)
+    y_pred = LR_model.predict(X_test)
+    # 评价效果
     accuracy = metrics.accuracy_score(y_pred, y_test)
     precision = metrics.precision_score(y_pred, y_test, pos_label=1)
     recall = metrics.recall_score(y_pred, y_test, pos_label=1)
-    print('accuracy:',accuracy)
-    print('precision:',precision)
-    print('recall:',recall)
+    print('accuracy:', accuracy)
+    print('precision:', precision)
+    print('recall:', recall)
+    fpr, tpr, _ = metrics.roc_curve(y_test.ravel(), y_pred.ravel())
+    print('AUC:\t', metrics.auc(fpr, tpr))
+    auc = metrics.roc_auc_score(y_test, y_pred)
+    print('AUC(System):\t', auc) # 包计算
+
+    # ROC曲线绘图
+    mpl.rcParams['font.sans-serif'] = 'SimHei'
+    mpl.rcParams['axes.unicode_minus'] = False
+    plt.figure(figsize=(8, 7), dpi=80, facecolor='w')
+    plt.plot(fpr, tpr, 'r-', lw=2, label='AUC=%.4f' % auc)
+    plt.legend(loc='lower right')
+    plt.xlim((-0.01, 1.02))
+    plt.ylim((-0.01, 1.02))
+    plt.xticks(np.arange(0, 1.1, 0.1))
+    plt.yticks(np.arange(0, 1.1, 0.1))
+    plt.xlabel('False Positive Rate', fontsize=14)
+    plt.ylabel('True Positive Rate', fontsize=14)
+    plt.grid(b=True, ls=':')
+    plt.title('ROC曲线和AUC', fontsize=18)
+    plt.show()
