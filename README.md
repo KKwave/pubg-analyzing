@@ -5,6 +5,8 @@ pubg_data_analyzsis.py为数据的探索性分析（EDA）代码
 
 pubg_ml.py是关于这个数据集做的机器学习代码
 
+load_several_data.py用于读取多份文件的方法
+
 绝地求生游戏数据分析.pdf为此次项目的介绍与分析过程
 
 数据集地址：https://www.kaggle.com/skihikingkevin/pubg-match-deaths/data
